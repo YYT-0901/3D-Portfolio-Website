@@ -46,87 +46,94 @@ const configureRenderer = (canvas) => {
   return renderer
 }
 
-const createBadgeTexture = (profile) => {
+const createBadgeTexture = async (profile) => {
   const canvas = document.createElement('canvas')
+
   canvas.width = 900
   canvas.height = 1280
+
   const context = canvas.getContext('2d')
 
   context.fillStyle = '#f3efe6'
   context.fillRect(0, 0, canvas.width, canvas.height)
+
   context.strokeStyle = '#111111'
   context.lineWidth = 24
   context.strokeRect(22, 22, canvas.width - 44, canvas.height - 44)
 
-  context.fillStyle = '#111111'
-  context.font = '900 76px Arial, sans-serif'
-  context.fillText('001', 62, 114)
-  context.font = '700 30px Arial, sans-serif'
-  context.textAlign = 'right'
-  context.fillText('DIRECTOR PASS', 834, 100)
-  context.textAlign = 'left'
+  const image = new Image()
+  image.src = profile.image || '/assets/avatar.jpg'
 
-  context.fillStyle = '#ffc400'
-  context.fillRect(62, 154, 776, 640)
-  context.save()
-  context.translate(450, 465)
-  context.strokeStyle = '#111111'
-  context.lineWidth = 9
-  for (let index = 0; index < 28; index += 1) {
-    const angle = (Math.PI * 2 * index) / 28
-    context.beginPath()
-    context.moveTo(Math.cos(angle) * 165, Math.sin(angle) * 165)
-    context.lineTo(Math.cos(angle) * 430, Math.sin(angle) * 430)
-    context.stroke()
+  try {
+    await image.decode()
+
+    const x = 62
+    const y = 154
+    const width = 776
+    const height = 640
+
+    const imageRatio = image.width / image.height
+    const targetRatio = width / height
+
+    let sx = 0
+    let sy = 0
+    let sw = image.width
+    let sh = image.height
+
+    if (imageRatio > targetRatio) {
+      sw = image.height * targetRatio
+      sx = (image.width - sw) / 2
+    } else {
+      sh = image.width / targetRatio
+      sy = (image.height - sh) / 2
+    }
+
+    context.drawImage(
+      image,
+      sx,
+      sy,
+      sw,
+      sh,
+      x,
+      y,
+      width,
+      height,
+    )
+  } catch (error) {
+    console.warn('Badge avatar failed to load, falling back to a generated placeholder.', error)
+
+    const fallbackGradient = context.createLinearGradient(0, 0, canvas.width, canvas.height)
+    fallbackGradient.addColorStop(0, '#f7d66b')
+    fallbackGradient.addColorStop(1, '#f2efe8')
+    context.fillStyle = fallbackGradient
+    context.fillRect(62, 154, 776, 640)
+
+    context.fillStyle = '#111111'
+    context.font = '900 120px Arial, sans-serif'
+    context.textAlign = 'center'
+    context.fillText((profile.name || 'ME').slice(0, 2).toUpperCase(), canvas.width / 2, 540)
+    context.textAlign = 'left'
   }
-  context.restore()
 
-  context.fillStyle = '#ffffff'
-  context.beginPath()
-  context.ellipse(450, 760, 245, 230, 0, 0, Math.PI * 2)
-  context.fill()
-  context.strokeStyle = '#111111'
-  context.lineWidth = 12
-  context.stroke()
-
-  context.fillStyle = '#e8b58c'
-  context.beginPath()
-  context.ellipse(450, 438, 142, 172, -0.08, 0, Math.PI * 2)
-  context.fill()
-  context.strokeStyle = '#111111'
-  context.lineWidth = 10
-  context.stroke()
-
-  context.fillStyle = '#111111'
-  context.beginPath()
-  context.moveTo(316, 420)
-  context.quadraticCurveTo(330, 245, 493, 258)
-  context.quadraticCurveTo(620, 270, 585, 410)
-  context.quadraticCurveTo(505, 345, 316, 420)
-  context.fill()
-
-  context.fillStyle = '#111111'
-  context.fillRect(304, 410, 132, 54)
-  context.fillRect(464, 410, 132, 54)
-  context.fillRect(430, 424, 38, 12)
-  context.strokeStyle = '#f3efe6'
-  context.lineWidth = 6
-  context.strokeRect(304, 410, 132, 54)
-  context.strokeRect(464, 410, 132, 54)
-
+  // 底部信息
   context.fillStyle = '#111111'
   context.fillRect(62, 824, 776, 390)
+
   context.fillStyle = '#ffffff'
   context.font = '900 92px Arial, sans-serif'
   context.fillText(profile.name.toUpperCase(), 100, 930)
+
   context.fillStyle = '#ffc400'
   context.fillRect(96, 974, 708, 68)
+
   context.fillStyle = '#111111'
   context.font = '900 38px Arial, sans-serif'
   context.fillText(profile.role.toUpperCase(), 122, 1022)
+
   context.fillStyle = '#ffffff'
   context.font = '700 28px Arial, sans-serif'
   context.fillText(profile.location.toUpperCase(), 100, 1112)
+
   context.fillStyle = '#ffc400'
   context.font = '900 24px Arial, sans-serif'
   context.fillText('FRAME · LIGHT · PERFORMANCE', 100, 1170)
@@ -134,6 +141,7 @@ const createBadgeTexture = (profile) => {
   const texture = new THREE.CanvasTexture(canvas)
   texture.colorSpace = THREE.SRGBColorSpace
   texture.anisotropy = 8
+
   return texture
 }
 
@@ -154,9 +162,10 @@ const drawPhoneTexture = (context, canvas, profile, active) => {
 
   context.fillStyle = '#f7f3ea'
   context.font = '700 28px Arial, sans-serif'
-  context.fillText('09:41', 56, 70)
-  context.textAlign = 'right'
-  context.fillText('● ● ●', canvas.width - 54, 70)
+  context.fillText(new Date().toLocaleTimeString([], {
+    hour: '2-digit',
+    minute: '2-digit'
+  }), 56, 70)
   context.textAlign = 'left'
 
   context.fillStyle = '#ffc400'
@@ -206,7 +215,7 @@ const disposeScene = (scene, renderer, textures = []) => {
   renderer.forceContextLoss()
 }
 
-export const createBadgeScene = (canvas, profile) => {
+export const createBadgeScene = async (canvas, profile) => {
   const renderer = configureRenderer(canvas)
   const scene = new THREE.Scene()
   const camera = new THREE.PerspectiveCamera(36, 1, 0.1, 60)
@@ -220,7 +229,7 @@ export const createBadgeScene = (canvas, profile) => {
   rimLight.position.set(6, 1, -4)
   scene.add(rimLight)
 
-  const badgeTexture = createBadgeTexture(profile)
+  const badgeTexture = await createBadgeTexture(profile)
   badgeTexture.anisotropy = Math.min(renderer.capabilities.getMaxAnisotropy(), 8)
 
   const root = new THREE.Group()

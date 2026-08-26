@@ -1,4 +1,5 @@
 export const profile = {
+  image: '/assets/avatar.jpg',
   name: 'Shearmine',
   role: 'Film Director',
   location: 'Kuala Lumpur, Malaysia',

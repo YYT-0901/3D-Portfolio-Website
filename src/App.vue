@@ -1,8 +1,36 @@
 <script setup>
+import { computed, ref } from 'vue'
 import AboutSection from './components/AboutSection.vue';
 import HeroScene from './components/HeroScene.vue'
 import ProjectCard from './components/ProjectCard.vue'
 import { projects } from './data/projects'
+
+const selectedCategory = ref('All')
+
+const categoryOptions = computed(() => {
+  const values = projects.flatMap((project) => {
+    if (!project.category) return []
+    return project.category
+      .split(',')
+      .map((item) => item.trim())
+      .filter(Boolean)
+  })
+
+  return ['All', ...new Set(values)]
+})
+
+const filteredProjects = computed(() => {
+  if (selectedCategory.value === 'All') return projects
+
+  return projects.filter((project) => {
+    const categories = (project.category || '')
+      .split(',')
+      .map((item) => item.trim())
+      .filter(Boolean)
+
+    return categories.includes(selectedCategory.value)
+  })
+})
 </script>
 
 <template>
@@ -25,7 +53,7 @@ import { projects } from './data/projects'
       <section id="portfolio" class="work-section section-shell">
         <div class="section-heading">
           <div>
-            <span class="section-index">01 / SELECTED WORK</span>
+            <span class="section-index">SELECTED WORK</span>
             <h2>Things made<br />to <em>matter.</em></h2>
           </div>
           <p>
@@ -33,21 +61,21 @@ import { projects } from './data/projects'
           </p>
         </div>
 
-        <div class="projects-grid">
-          <ProjectCard v-for="project in projects" :key="project.number" :project="project" />
+        <div class="project-filter" aria-label="Project categories">
+          <button
+            v-for="category in categoryOptions"
+            :key="category"
+            type="button"
+            class="project-filter__button"
+            :class="{ 'is-active': selectedCategory === category }"
+            @click="selectedCategory = category"
+          >
+            {{ category }}
+          </button>
         </div>
-      </section>
 
-      <section id="contact" class="contact-section section-shell">
-        <span class="section-index">03 / CONTACT</span>
-        <h2>Have a story to tell?</h2>
-        <a href="mailto:hello@example.com">
-          Let’s find the frame
-          <span>↗</span>
-        </a>
-        <div class="contact-meta">
-          <span>Kuala Lumpur · MY</span>
-          <span>Open for selected productions</span>
+        <div class="projects-grid">
+          <ProjectCard v-for="project in filteredProjects" :key="project['modal-id']" :project="project" />
         </div>
       </section>
     </main>

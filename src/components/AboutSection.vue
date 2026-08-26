@@ -58,7 +58,13 @@ onMounted(async () => {
   }
 
   try {
-    badgeScene = createBadgeScene(badgeCanvas.value, profile)
+    try {
+      badgeScene = await createBadgeScene(badgeCanvas.value, profile)
+    } catch (error) {
+      console.error('Unable to initialize the badge scene.', error)
+      badgeScene = null
+    }
+
     phoneScene = createPhoneScene(phoneCanvas.value, profile)
     badgeResizeObserver = new ResizeObserver(syncBadgeStagePosition)
     phoneResizeObserver = new ResizeObserver(() => phoneScene?.resize())
