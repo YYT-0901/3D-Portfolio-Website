@@ -166,6 +166,20 @@ onBeforeUnmount(() => {
           @click="togglePhone"
         >
           <canvas ref="phoneCanvas" class="about-webgl phone-webgl"></canvas>
+          <span class="contact-burst" aria-hidden="true">
+            <span class="contact-burst__entry contact-burst__entry--email">
+              <span class="contact-burst__label">Email</span>
+              <span class="contact-burst__value" :data-text="profile.email">
+                {{ profile.email }}
+              </span>
+            </span>
+            <span class="contact-burst__entry contact-burst__entry--phone">
+              <span class="contact-burst__label">Phone</span>
+              <span class="contact-burst__value" :data-text="profile.phone">
+                {{ profile.phone }}
+              </span>
+            </span>
+          </span>
           <span class="phone-hint">
             {{ phoneIsActive ? siteConfig.about.phoneHintHidden : siteConfig.about.phoneHintVisible }}
           </span>

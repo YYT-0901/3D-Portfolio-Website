@@ -60,7 +60,7 @@ const createBadgeTexture = async (profile) => {
   context.strokeStyle = '#111111'
   context.lineWidth = 24
   context.strokeRect(22, 22, canvas.width - 44, canvas.height - 44)
-
+  
   const image = new Image()
   image.src = profile.image || '/assets/avatar.jpg'
 
@@ -68,9 +68,9 @@ const createBadgeTexture = async (profile) => {
     await image.decode()
 
     const x = 62
-    const y = 154
+    const y = 50
     const width = 776
-    const height = 640
+    const height = 770
 
     const imageRatio = image.width / image.height
     const targetRatio = width / height
@@ -177,25 +177,6 @@ const drawPhoneTexture = (context, canvas, profile, active) => {
   context.fillStyle = '#ffc400'
   context.font = '800 34px Arial, sans-serif'
   context.fillText(profile.role.toUpperCase(), 56, 340)
-
-  const rows = [
-    ['EMAIL', profile.email],
-    ['PHONE', profile.phone],
-    ['BASE', profile.location],
-  ]
-
-  rows.forEach(([label, value], index) => {
-    const top = 460 + index * 220
-    context.fillStyle = index % 2 === 0 ? '#f4f0e8' : '#ffc400'
-    context.beginPath()
-    context.roundRect(44, top, canvas.width - 88, 170, 28)
-    context.fill()
-    context.fillStyle = '#111111'
-    context.font = '900 27px Arial, sans-serif'
-    context.fillText(label, 82, top + 54)
-    context.font = '700 32px Arial, sans-serif'
-    context.fillText(value, 82, top + 112)
-  })
 
   context.fillStyle = '#f7f3ea'
   context.font = '700 28px Arial, sans-serif'
