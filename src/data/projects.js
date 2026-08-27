@@ -1,85 +1,135 @@
-export const projects = [
-  {
+const projectModules = import.meta.glob('./projects/*.md', {
+  eager: true,
+  as: 'raw',
+})
+
+const markdownFiles = Object.entries(projectModules)
+  .sort(([a], [b]) => a.localeCompare(b))
+  .map(([path, source]) => ({
+    key: path.split('/').pop().replace(/\.md$/, ''),
+    source,
+  }))
+
+const parseFrontmatter = (markdown) => {
+  const normalized = String(markdown || '').replace(/\r\n/g, '\n').replace(/\r/g, '\n')
+
+  if (!normalized.startsWith('---')) {
+    return { frontmatter: {}, body: normalized }
+  }
+
+  const endOfFrontmatter = normalized.indexOf('\n---', 4)
+  if (endOfFrontmatter === -1) {
+    return { frontmatter: {}, body: normalized }
+  }
+
+  const rawFrontmatter = normalized.slice(4, endOfFrontmatter).trim()
+  const body = normalized.slice(endOfFrontmatter + 5).trim()
+
+  const frontmatter = {}
+
+  for (const line of rawFrontmatter.split('\n')) {
+    const match = line.match(/^([A-Za-z0-9_-]+):\s*(.*)$/)
+    if (!match) continue
+    const [, key, value] = match
+    frontmatter[key] = value.trim()
+  }
+
+  return { frontmatter, body }
+}
+
+const renderMarkdownToHtml = (markdown) => {
+  const lines = (markdown || '').split('\n').map((line) => line.trim())
+  const blocks = []
+  let currentParagraph = []
+
+  const flushParagraph = () => {
+    if (!currentParagraph.length) return
+    const text = currentParagraph.join(' ').trim()
+    if (text) {
+      blocks.push(`<p>${text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')}</p>`)
+    }
+    currentParagraph = []
+  }
+
+  for (const line of lines) {
+    if (!line) {
+      flushParagraph()
+      continue
+    }
+
+    if (line.startsWith('### ')) {
+      flushParagraph()
+      blocks.push(`<h3>${line.replace('### ', '')}</h3>`)
+      continue
+    }
+
+    if (line.startsWith('- ')) {
+      flushParagraph()
+      blocks.push(`<li>${line.replace('- ', '')}</li>`)
+      continue
+    }
+
+    currentParagraph.push(line)
+  }
+
+  flushParagraph()
+
+  const listItems = blocks.filter((block) => block.startsWith('<li>'))
+  if (listItems.length) {
+    const wrapped = `<ul>${listItems.join('')}</ul>`
+    const withoutListItems = blocks.filter((block) => !block.startsWith('<li>'))
+    blocks.splice(0, blocks.length, ...withoutListItems, wrapped)
+  }
+
+  return blocks.join('')
+}
+
+const normalizeProject = (source, index) => {
+  const { frontmatter, body } = parseFrontmatter(source)
+
+  const markdownHtml = renderMarkdownToHtml(body)
+  const description = frontmatter.description || body.replace(/[#>*_\-`]/g, '').trim().split('\n\n')[0] || 'Project overview.'
+
+  const imagePath = frontmatter.image || `/assets/projects/${frontmatter.title?.toLowerCase().replace(/\s+/g, '-') || index}.svg`
+
+  return {
     layout: 'default',
-    'modal-id': 1,
-    date: '2014-07-17',
-    img: 'looking-for-what.svg',
-    alt: 'Looking for What poster artwork',
-    title: 'Looking for What',
-    'project-date': 'September 2024',
-    subtitle: 'Looking for What',
-    client: 'Independent',
-    category: 'Director,Scriptwriter,Producer,Sound Mixer,Editor',
-    description:
-      '面对女友留下的遗物，他用一段平静而荒诞的独白、拼凑出这一年寻爱的轨迹：四场闹剧之后，第五段感情也迎来了尾声，我们这一生，在找寻着什么？Left with the belongings of his former lover, he pieces together the story of a year spent searching for love through a calm yet absurd monologue. After four chaotic romances, the fifth comes to an end. What is it that we spend our lives searching for?',
-    'role-description': '',
-    duration: '14:09',
-    color: 'Color+',
-    language: 'Chinese',
-    format: 'Short Film',
-    'watch-url': 'https://drive.google.com/file/d/1aenjTER3XWzPO5gH06Yq_dI-t4GXFnRi/view',
-    hero_media: {
-      type: 'iframe',
-      provider: 'google-drive',
-      src: 'https://drive.google.com/file/d/1aenjTER3XWzPO5gH06Yq_dI-t4GXFnRi/preview',
-      title: 'Project film',
-      aspect_ratio: '16 / 9',
-    },
-    accent: '#ff6a3d',
-    surface: '#f6e4d0',
-  },
-  {
-    layout: 'default',
-    'modal-id': 2,
-    date: '2021-11-08',
-    img: 'station-echo.svg',
-    alt: 'Station Echo poster artwork',
-    title: 'Station Echo',
-    'project-date': 'January 2025',
-    subtitle: 'Terminal drift',
-    client: 'Northline Creative',
-    category: 'Director,Producer,Editor',
-    description:
-      'A late-night commuter stares into a city that never stops moving, caught between a fading memory and the next train home. The film plays like a postcard from a nervous body in motion, carrying fragments of intimacy, silence and exhaustion.',
-    'role-description': 'Creative direction and edit for a short-form narrative built around transit, repetition and urban melancholy.',
-    duration: '06:42',
-    color: 'Digital +',
-    language: 'Mandarin',
-    format: 'Music Video',
-    'watch-url': 'https://example.com/station-echo',
-    hero_media: {
-      type: 'image',
-      src: '/assets/projects/station-echo.svg',
-      title: 'Station Echo still',
-    },
-    accent: '#2245bb',
-    surface: '#d9e1ff',
-  },
-  {
-    layout: 'default',
-    'modal-id': 3,
-    date: '2023-02-14',
-    img: 'fifth-room.svg',
-    alt: 'Fifth Room poster artwork',
-    title: 'Fifth Room',
-    'project-date': 'May 2025',
-    subtitle: 'A rehearsal of absence',
-    client: 'Miro House',
-    category: 'Director,Scriptwriter,Production Designer,Editor',
-    description:
-      'In a room built from rehearsal notes and memory fragments, a performer repeats the same gesture until it becomes a new language. The film traces rehearsal, loss and the choreography of becoming present again.',
-    'role-description': 'Short-form performance film with a quiet visual palette and a stripped-back editorial rhythm.',
-    duration: '08:18',
-    color: 'Color',
-    language: 'English',
-    format: 'Experimental Film',
-    'watch-url': 'https://example.com/fifth-room',
-    hero_media: {
-      type: 'image',
-      src: '/assets/projects/fifth-room.svg',
-      title: 'Fifth Room still',
-    },
-    accent: '#1c8c6a',
-    surface: '#dcefe8',
-  },
-]
+    'modal-id': index + 1,
+    date: frontmatter.date || '',
+    img: imagePath,
+    image: imagePath,
+    alt: frontmatter.alt || frontmatter.title || 'Project artwork',
+    title: frontmatter.title || 'Untitled project',
+    'project-date': frontmatter['project-date'] || frontmatter.date || '',
+    subtitle: frontmatter.subtitle || frontmatter.title || 'Untitled project',
+    client: frontmatter.client || 'Independent',
+    category: frontmatter.category || 'General',
+    description,
+    'role-description': frontmatter['role-description'] || '',
+    duration: frontmatter.duration || '',
+    color: frontmatter.color || '',
+    language: frontmatter.language || 'English',
+    format: frontmatter.format || 'Short Film',
+    'watch-url': frontmatter['watch-url'] || '',
+    hero_media: frontmatter['watch-url']
+      ? {
+          type: 'iframe',
+          provider: 'external',
+          src: frontmatter['watch-url'].includes('drive.google.com')
+            ? frontmatter['watch-url'].replace('/view', '/preview')
+            : frontmatter['watch-url'],
+          title: frontmatter.title || 'Project film',
+          aspect_ratio: '16 / 9',
+        }
+      : {
+          type: 'image',
+          src: imagePath,
+          title: frontmatter.title || 'Project still',
+        },
+    accent: frontmatter.accent || '#ff6a3d',
+    surface: frontmatter.surface || '#f7ead8',
+    markdownHtml,
+  }
+}
+
+export const projects = markdownFiles.map(({ source }, index) => normalizeProject(source, index))

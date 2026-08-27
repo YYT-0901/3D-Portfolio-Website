@@ -1,9 +1,10 @@
 <script setup>
 import { computed, ref } from 'vue'
-import AboutSection from './components/AboutSection.vue';
+import AboutSection from './components/AboutSection.vue'
 import HeroScene from './components/HeroScene.vue'
 import ProjectCard from './components/ProjectCard.vue'
 import { projects } from './data/projects'
+import { siteConfig } from './data/siteConfig'
 
 const selectedCategory = ref('All')
 
@@ -36,14 +37,14 @@ const filteredProjects = computed(() => {
 <template>
   <div id="top">
     <header class="site-nav">
-      <a class="wordmark" href="#top" aria-label="BotKing home">
-        <span>BK</span>
-        <small>Film director</small>
+      <a class="wordmark" href="#top" :aria-label="siteConfig.brand.homeLabel">
+        <span>{{ siteConfig.brand.short }}</span>
+        <small>{{ siteConfig.brand.tagline }}</small>
       </a>
       <nav aria-label="Primary navigation">
-        <a href="#top">Home</a>
-        <a href="#about">About</a>
-        <a href="#portfolio">Portfolio</a>
+        <a href="#top">{{ siteConfig.nav.home }}</a>
+        <a href="#about">{{ siteConfig.nav.about }}</a>
+        <a href="#portfolio">{{ siteConfig.nav.portfolio }}</a>
       </nav>
     </header>
 
@@ -53,12 +54,10 @@ const filteredProjects = computed(() => {
       <section id="portfolio" class="work-section section-shell">
         <div class="section-heading">
           <div>
-            <span class="section-index">SELECTED WORK</span>
-            <h2>Things made<br />to <em>matter.</em></h2>
+            <span class="section-index">{{ siteConfig.portfolio.kicker }}</span>
+            <h2>{{ siteConfig.portfolio.titleLine1 }}<br />{{ siteConfig.portfolio.titleLine2Start }} <em>{{ siteConfig.portfolio.titleLine2Em }}</em></h2>
           </div>
-          <p>
-            A selection of narrative films, campaigns and music visuals shaped from first treatment to final frame.
-          </p>
+          <p>{{ siteConfig.portfolio.description }}</p>
         </div>
 
         <div class="project-filter" aria-label="Project categories">
@@ -81,8 +80,8 @@ const filteredProjects = computed(() => {
     </main>
 
     <footer>
-      <span>BOTKING © 2026</span>
-      <a href="#top">Back to top ↑</a>
+      <span>{{ siteConfig.footer.copyright }}</span>
+      <a href="#top">{{ siteConfig.footer.backToTop }}</a>
     </footer>
   </div>
 </template>

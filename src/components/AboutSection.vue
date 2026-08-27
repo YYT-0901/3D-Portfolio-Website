@@ -1,6 +1,7 @@
 <script setup>
 import { nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
 import { profile } from '../data/profile'
+import { siteConfig } from '../data/siteConfig'
 import { createBadgeScene, createPhoneScene } from '../three/createAboutObjects'
 
 const section = ref(null)
@@ -133,14 +134,13 @@ onBeforeUnmount(() => {
       <article class="comic-panel bio-panel">
         <div class="halftone" aria-hidden="true"></div>
         <div class="bio-panel__inner">
-          <span class="comic-label">THE STORY SO FAR</span>
-          <h2 id="about-title">ABOUT ME!</h2>
-          <span class="brush-label">DIRECTOR'S NOTE</span>
+          <span class="comic-label">{{ siteConfig.about.kicker }}</span>
+          <h2 id="about-title">{{ siteConfig.about.heading }}</h2>
+          <span class="brush-label">{{ siteConfig.about.note }}</span>
 
           <p class="bio-intro">
-            Hello, I’m <strong>{{ profile.name }}</strong> — a
-            <mark>{{ profile.role }}</mark> shaping human stories through performance,
-            atmosphere and precise visual language.
+            {{ siteConfig.about.greeting }} <strong>{{ profile.name }}</strong> — a
+            <mark>{{ profile.role }}</mark> {{ siteConfig.about.introBody }}
           </p>
           <p>{{ profile.intro }}</p>
           <p>{{ profile.approach }}</p>
@@ -167,7 +167,7 @@ onBeforeUnmount(() => {
         >
           <canvas ref="phoneCanvas" class="about-webgl phone-webgl"></canvas>
           <span class="phone-hint">
-            {{ phoneIsActive ? 'Tap to hide contact' : 'Tap phone to reveal contact' }}
+            {{ phoneIsActive ? siteConfig.about.phoneHintHidden : siteConfig.about.phoneHintVisible }}
           </span>
           <span v-if="phoneIsActive" class="sr-only">
             Email {{ profile.email }}. Phone {{ profile.phone }}. Based in {{ profile.location }}.
