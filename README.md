@@ -1,4 +1,4 @@
-# Shearmine 个人作品集网站
+# 3D个人作品集网站
 
 这是一个使用 Vue 3、Vite 和 Three.js 制作的单页作品集网站，包含滚动驱动的 3D 首页、个人简介、作品分类、分页和作品详情抽屉。
 
@@ -55,6 +55,76 @@ npm run build
 ```bash
 npm run preview
 ```
+
+## 部署到 Cloudflare Pages
+
+这个项目是纯静态 Vite 网站，生产文件会输出到 `dist/`，可以直接部署到 Cloudflare Pages。
+
+### 方式一：连接 Git 自动部署（推荐）
+
+1. 把项目推送到 GitHub 或 GitLab。
+2. 登录 Cloudflare Dashboard，进入 **Workers & Pages**。
+3. 选择 **Create application → Pages → Import an existing Git repository**。
+4. 选择这个项目的仓库。
+5. 使用以下构建配置：
+
+| Cloudflare 配置 | 值 |
+| --- | --- |
+| Framework preset | `Vite` |
+| Build command | `npm run build` |
+| Build output directory | `dist` |
+| Root directory | 留空；只有项目位于 monorepo 子目录时才填写 |
+
+在 **Environment variables** 中增加：
+
+```text
+NODE_VERSION=22.16.0
+```
+
+该版本满足当前 Vite 的 Node.js 要求。保存并部署后，网站会获得一个 `项目名.pages.dev` 地址。之后每次推送生产分支，Cloudflare 都会自动重新构建和发布；其他分支和 Pull Request 可以生成预览部署。
+
+### 方式二：使用 Wrangler 手动上传
+
+先构建网站：
+
+```bash
+npm ci
+npm run build
+```
+
+第一次使用时登录 Cloudflare，并创建 Pages 项目：
+
+```bash
+npx wrangler login
+npx wrangler pages project create
+```
+
+上传 `dist/`：
+
+```bash
+npx wrangler pages deploy dist --project-name=my-portfolio
+```
+
+把 `my-portfolio` 替换成实际的 Cloudflare Pages 项目名称。后续发布只需要重新构建并再次执行上传命令：
+
+```bash
+npm run build
+npx wrangler pages deploy dist --project-name=my-portfolio
+```
+
+如需部署成预览分支：
+
+```bash
+npx wrangler pages deploy dist --project-name=my-portfolio --branch=preview
+```
+
+### 部署方式注意事项
+
+- 创建 Pages 项目时应先决定使用 Git 集成还是 Direct Upload；同一个项目之后不能在这两种模式之间切换，需要切换时必须新建 Pages 项目。
+- 也可以在 Cloudflare Dashboard 使用 Drag and drop，上传整个 `dist/` 文件夹，但不建议把源码目录直接上传。
+- 当前网站使用页面锚点，没有 Vue Router 路由，因此不需要额外配置 `_redirects`。
+- 自定义域名可在 Pages 项目的 **Custom domains** 页面绑定。
+- Cloudflare 官方文档：[Vite 部署](https://developers.cloudflare.com/pages/framework-guides/deploy-a-vite3-project/)、[Git 集成](https://developers.cloudflare.com/pages/get-started/git-integration/)、[Direct Upload](https://developers.cloudflare.com/pages/get-started/direct-upload/)。
 
 ## 常用配置位置
 
