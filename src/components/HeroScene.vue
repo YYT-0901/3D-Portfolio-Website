@@ -164,10 +164,7 @@ const aboutStyle = computed(() => ({
     scale(${0.96 + aboutProgress.value * 0.04})
   `,
 
-  pointerEvents:
-    progress.value >= 0.96
-      ? 'auto'
-      : 'none',
+  pointerEvents: aboutProgress.value > 0 ? 'auto' : 'none',
 }))
 
 onMounted(() => {
