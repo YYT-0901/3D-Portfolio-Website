@@ -1,14 +1,14 @@
 export const profile = {
   image: '/assets/avatar.jpg',
   name: 'Shearmine',
-  role: 'Film Director',
+  role: 'Almighty Goddess',
   location: 'Kuala Lumpur, Malaysia',
-  email: 'hello@example.com',
-  phone: '+60 12 345 6789',
+  email: 'lwying13@gmail.com',
+  phone: '+6019-4867311',
   availability: 'Available for selected productions',
   intro:
-    'I direct films built around performance, atmosphere and the details that make a story feel emotionally true.',
+    'I’m a creative who works across video, photography, marketing, and theatre. With a background in Drama & Visuals, I’m interested in how visual elements can shape the way a story is told.',
   approach:
-    'Every project begins with character and intention, then finds the camera movement, light and rhythm that let an audience feel it.',
-  disciplines: ['Narrative film', 'Commercial direction', 'Music visuals', 'Creative development'],
+    'Whether I’m behind the camera, in the editing room, or working on a production, I enjoy being part of the process from idea to final piece. I’m always looking for new stories to tell and new ways to bring them to life.',
+  disciplines: ['Producer', 'Director', 'Scriptwriter', 'Sound Mixer'],
 }

@@ -1,135 +1,123 @@
 const projectModules = import.meta.glob('./projects/*.md', {
   eager: true,
-  as: 'raw',
+  query: '?raw',
+  import: 'default',
 })
 
-const markdownFiles = Object.entries(projectModules)
-  .sort(([a], [b]) => a.localeCompare(b))
-  .map(([path, source]) => ({
-    key: path.split('/').pop().replace(/\.md$/, ''),
-    source,
-  }))
+const projectFiles = Object.entries(projectModules)
+  .sort(([leftPath], [rightPath]) => leftPath.localeCompare(rightPath))
+  .map(([, source]) => source)
 
 const parseFrontmatter = (markdown) => {
   const normalized = String(markdown || '').replace(/\r\n/g, '\n').replace(/\r/g, '\n')
 
   if (!normalized.startsWith('---')) {
-    return { frontmatter: {}, body: normalized }
+    return { frontmatter: {}, body: normalized.trim() }
   }
 
-  const endOfFrontmatter = normalized.indexOf('\n---', 4)
-  if (endOfFrontmatter === -1) {
-    return { frontmatter: {}, body: normalized }
+  const frontmatterEnd = normalized.indexOf('\n---', 4)
+  if (frontmatterEnd === -1) {
+    return { frontmatter: {}, body: normalized.trim() }
   }
-
-  const rawFrontmatter = normalized.slice(4, endOfFrontmatter).trim()
-  const body = normalized.slice(endOfFrontmatter + 5).trim()
 
   const frontmatter = {}
+  const rawFrontmatter = normalized.slice(4, frontmatterEnd).trim()
 
   for (const line of rawFrontmatter.split('\n')) {
     const match = line.match(/^([A-Za-z0-9_-]+):\s*(.*)$/)
     if (!match) continue
-    const [, key, value] = match
-    frontmatter[key] = value.trim()
+    frontmatter[match[1]] = match[2].trim()
   }
 
-  return { frontmatter, body }
+  return {
+    frontmatter,
+    body: normalized.slice(frontmatterEnd + 5).trim(),
+  }
 }
 
-const renderMarkdownToHtml = (markdown) => {
-  const lines = (markdown || '').split('\n').map((line) => line.trim())
-  const blocks = []
-  let currentParagraph = []
+const createEmbedUrl = (watchUrl) => {
+  if (!watchUrl) return ''
 
-  const flushParagraph = () => {
-    if (!currentParagraph.length) return
-    const text = currentParagraph.join(' ').trim()
-    if (text) {
-      blocks.push(`<p>${text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')}</p>`)
+  try {
+    const url = new URL(watchUrl)
+
+    if (url.hostname === 'drive.google.com') {
+      const fileMatch = url.pathname.match(/^\/file\/d\/([^/]+)/)
+      if (fileMatch) return `https://drive.google.com/file/d/${fileMatch[1]}/preview`
+
+      const folderMatch = url.pathname.match(/^\/drive\/folders\/([^/]+)/)
+      if (folderMatch) {
+        return `https://drive.google.com/embeddedfolderview?id=${folderMatch[1]}#grid`
+      }
     }
-    currentParagraph = []
+
+    if (url.hostname === 'youtu.be') {
+      const videoId = url.pathname.split('/').filter(Boolean)[0]
+      if (videoId) return `https://www.youtube.com/embed/${videoId}`
+    }
+
+    if (url.hostname === 'www.youtube.com' || url.hostname === 'youtube.com') {
+      const videoId = url.searchParams.get('v')
+      if (videoId) return `https://www.youtube.com/embed/${videoId}`
+    }
+
+    if (url.hostname === 'www.instagram.com' || url.hostname === 'instagram.com') {
+      const reelMatch = url.pathname.match(/^\/reel\/([^/]+)/)
+      if (reelMatch) return `https://www.instagram.com/reel/${reelMatch[1]}/embed`
+    }
+
+    if (url.hostname === 'xhslink.com') {
+      url.protocol = 'https:'
+      return url.toString()
+    }
+
+    return watchUrl
+  } catch {
+    return watchUrl
   }
-
-  for (const line of lines) {
-    if (!line) {
-      flushParagraph()
-      continue
-    }
-
-    if (line.startsWith('### ')) {
-      flushParagraph()
-      blocks.push(`<h3>${line.replace('### ', '')}</h3>`)
-      continue
-    }
-
-    if (line.startsWith('- ')) {
-      flushParagraph()
-      blocks.push(`<li>${line.replace('- ', '')}</li>`)
-      continue
-    }
-
-    currentParagraph.push(line)
-  }
-
-  flushParagraph()
-
-  const listItems = blocks.filter((block) => block.startsWith('<li>'))
-  if (listItems.length) {
-    const wrapped = `<ul>${listItems.join('')}</ul>`
-    const withoutListItems = blocks.filter((block) => !block.startsWith('<li>'))
-    blocks.splice(0, blocks.length, ...withoutListItems, wrapped)
-  }
-
-  return blocks.join('')
 }
 
 const normalizeProject = (source, index) => {
   const { frontmatter, body } = parseFrontmatter(source)
-
-  const markdownHtml = renderMarkdownToHtml(body)
-  const description = frontmatter.description || body.replace(/[#>*_\-`]/g, '').trim().split('\n\n')[0] || 'Project overview.'
-
-  const imagePath = frontmatter.image || `/assets/projects/${frontmatter.title?.toLowerCase().replace(/\s+/g, '-') || index}.svg`
+  const imagePath = frontmatter.image || ''
+  const watchUrl = frontmatter['watch-url'] || ''
+  const embedUrl = createEmbedUrl(watchUrl)
 
   return {
     layout: 'default',
     'modal-id': index + 1,
-    date: frontmatter.date || '',
-    img: imagePath,
-    image: imagePath,
-    alt: frontmatter.alt || frontmatter.title || 'Project artwork',
-    title: frontmatter.title || 'Untitled project',
-    'project-date': frontmatter['project-date'] || frontmatter.date || '',
-    subtitle: frontmatter.subtitle || frontmatter.title || 'Untitled project',
-    client: frontmatter.client || 'Independent',
-    category: frontmatter.category || 'General',
-    description,
+    title: frontmatter.title || '',
+    subtitle: frontmatter.subtitle || '',
+    'project-date': frontmatter['project-date'] || '',
+    category: frontmatter.category || '',
     'role-description': frontmatter['role-description'] || '',
+    'act-as': frontmatter['act-as'] || '',
+    'watch-url': watchUrl,
+    image: imagePath,
+    img: imagePath,
+    alt: frontmatter.alt || '',
+    client: frontmatter.client || '',
+    description: frontmatter.description || body,
     duration: frontmatter.duration || '',
+    format: frontmatter.format || '',
     color: frontmatter.color || '',
-    language: frontmatter.language || 'English',
-    format: frontmatter.format || 'Short Film',
-    'watch-url': frontmatter['watch-url'] || '',
-    hero_media: frontmatter['watch-url']
+    language: frontmatter.language || '',
+    hero_media: embedUrl
       ? {
           type: 'iframe',
-          provider: 'external',
-          src: frontmatter['watch-url'].includes('drive.google.com')
-            ? frontmatter['watch-url'].replace('/view', '/preview')
-            : frontmatter['watch-url'],
-          title: frontmatter.title || 'Project film',
-          aspect_ratio: '16 / 9',
+          src: embedUrl,
+          title: frontmatter.title || '',
         }
-      : {
-          type: 'image',
-          src: imagePath,
-          title: frontmatter.title || 'Project still',
-        },
+      : imagePath
+        ? {
+            type: 'image',
+            src: imagePath,
+            title: frontmatter.alt || frontmatter.title || '',
+          }
+        : null,
     accent: frontmatter.accent || '#ff6a3d',
     surface: frontmatter.surface || '#f7ead8',
-    markdownHtml,
   }
 }
 
-export const projects = markdownFiles.map(({ source }, index) => normalizeProject(source, index))
+export const projects = projectFiles.map(normalizeProject)

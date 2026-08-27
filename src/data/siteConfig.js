@@ -1,8 +1,8 @@
 export const siteConfig = {
   brand: {
-    short: 'YYT',
-    tagline: 'Film director',
-    homeLabel: 'BotKing home',
+    short: 'LWY',
+    tagline: '李宛盈',
+    homeLabel: 'Producer - Director - Scriptwriter - Sound Mixer - Editor',
   },
   nav: {
     home: 'Home',
@@ -11,18 +11,21 @@ export const siteConfig = {
   },
   portfolio: {
     kicker: 'SELECTED WORK',
-    titleLine1: 'Things made',
-    titleLine2Start: 'to',
-    titleLine2Em: 'matter.',
+    titleLine1: 'PORTFOLIO',
+    titleLine2Start: '',
+    titleLine2Em: 'look at me.',
     description:
-      'A selection of narrative films, campaigns and music visuals shaped from first treatment to final frame.',
+      'I’m a creative who works across video, photography, marketing, and theatre. With a background in Drama & Visuals, I’m interested in how visual elements can shape the way a story is told.',
+    loadMore: 'Load more',
+    archiveKicker: 'ARCHIVE',
+    archiveTitle: 'All projects',
   },
   about: {
     kicker: 'THE STORY SO FAR',
     heading: 'ABOUT ME!',
-    note: "DIRECTOR'S NOTE",
+    note: "NOTE",
     greeting: 'Hello, I’m',
-    introBody: 'shaping human stories through performance, atmosphere and precise visual language.',
+    introBody: '',
     phoneHintVisible: 'Tap phone to reveal contact',
     phoneHintHidden: 'Tap to hide contact',
   },
@@ -45,7 +48,7 @@ export const siteConfig = {
     },
   },
   footer: {
-    copyright: 'BOTKING © 2026',
+    copyright: 'SHEARMINE © 2026',
     backToTop: 'Back to top ↑',
   },
 }
