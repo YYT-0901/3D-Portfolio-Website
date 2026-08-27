@@ -1,0 +1,17 @@
+title: 示例项目标题
+subtitle: Example Subtitle
+project-date: 2024/05
+category: SHORT FILM, EXPERIMENTAL
+role-description: Director, Editor
+act-as: Lead
+watch-url: https://youtu.be/VIDEO_ID
+image: /assets/projects/example.jpg
+alt: 示例图片说明
+client: Example Client
+description: 这是一个示例项目描述（如果省略，使用 markdown 正文）
+duration: 08:45
+format: SHORT FILM
+color: #1e5a88
+language: en
+accent: #ff6a3d
+surface: #f7ead8

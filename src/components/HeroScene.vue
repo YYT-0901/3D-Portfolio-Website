@@ -3,6 +3,8 @@ import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { createPortfolioScene } from '../three/createPortfolioScene'
 import AboutSection from './AboutSection.vue'
 
+const emit = defineEmits(['progress-end-change'])
+
 const hero = ref(null)
 const canvas = ref(null)
 const progress = ref(0)
@@ -17,6 +19,7 @@ let pointerCurrent = { x: 0, y: 0 }
 let startedAt = 0
 let sceneIsVisible = true
 let sceneObserver = null
+let isPastProgressEnd = false
 let snapIsArmed = false
 let hasSnappedToAbout = false
 let suppressAboutSnap = false
@@ -39,6 +42,13 @@ const updateTarget = () => {
     hero.value.offsetHeight - window.innerHeight,
     1,
   )
+
+  const isPastEnd = -rect.top > scrollableDistance
+
+  if (isPastEnd !== isPastProgressEnd) {
+    isPastProgressEnd = isPastEnd
+    emit('progress-end-change', isPastEnd)
+  }
 
   targetProgress = clamp(
     -rect.top / scrollableDistance,

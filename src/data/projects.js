@@ -1,12 +1,10 @@
 const projectModules = import.meta.glob('./projects/*.md', {
-  eager: true,
-  query: '?raw',
+  // do NOT eager-load; we'll import on demand
   import: 'default',
+  query: '?raw',
 })
 
-const projectFiles = Object.entries(projectModules)
-  .sort(([leftPath], [rightPath]) => leftPath.localeCompare(rightPath))
-  .map(([, source]) => source)
+const projectPaths = Object.keys(projectModules).sort((a, b) => a.localeCompare(b))
 
 const parseFrontmatter = (markdown) => {
   const normalized = String(markdown || '').replace(/\r\n/g, '\n').replace(/\r/g, '\n')
@@ -119,5 +117,11 @@ const normalizeProject = (source, index) => {
     surface: frontmatter.surface || '#f7ead8',
   }
 }
+export async function loadAllProjects() {
+  const imports = await Promise.all(projectPaths.map((p) => projectModules[p]()))
+  return imports.map((src, i) => normalizeProject(src, i))
+}
 
-export const projects = projectFiles.map(normalizeProject)
+export const totalProjects = () => projectPaths.length
+
+export const projectIndex = projectPaths.map((p, i) => ({ path: p, id: i + 1 }))

@@ -51,7 +51,7 @@ function closeDrawer() {
       </div>
 
       <div class="project-card__thumb">
-        <img :src="project.img || project.image || '/assets/projects/default.svg'" :alt="project.alt || project.title" />
+        <img loading="lazy" :src="project.img || project.image || '/assets/projects/default.svg'" :alt="project.alt || project.title" />
       </div>
 
       <div class="project-card__header">
@@ -59,7 +59,7 @@ function closeDrawer() {
           <p>{{ project.subtitle }}</p>
           <h3>{{ project.title }}</h3>
         </div>
-        <span class="project-card__pill">{{ project.format }}</span>
+        <span class="project-card__pill">{{ project.category }}</span>
       </div>
 
       

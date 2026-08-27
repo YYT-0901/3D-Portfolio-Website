@@ -5,7 +5,7 @@
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   --blue: #2d76a5;
-  --blue-dark: #2d76a5;
+  --blue-dark: #14496d;
   --cream: #272e38;
   --ink: #57dae3;
   --orange: #ff5b43;
@@ -151,8 +151,13 @@ a {
   width: min(1540px, calc(100% - 32px));
   padding: 10px 12px 10px 14px;
   border-radius: 999px;
+  background-color: transparent;
   transform: translateX(-50%);
-  transition: opacity 200ms ease, visibility 200ms ease;
+  transition: background-color 200ms ease, opacity 200ms ease, visibility 200ms ease;
+}
+
+.site-nav.has-background {
+  background-color: var(--blue-dark);
 }
 
 body.project-drawer-open {
@@ -549,6 +554,47 @@ body.project-drawer-open .site-nav {
   background: var(--ink);
   color: var(--cream);
   transform: translateY(-1px);
+}
+
+/* Pagination controls matching project filter buttons */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 36px;
+}
+
+.pagination button {
+  padding: 8px 14px;
+  border: 1px solid var(--ink);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ink);
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  cursor: pointer;
+  transition: background 180ms ease, color 180ms ease, transform 180ms ease, opacity 180ms ease;
+}
+
+.pagination button:hover:not(:disabled),
+.pagination button:focus-visible:not(:disabled) {
+  background: var(--ink);
+  color: var(--cream);
+  transform: translateY(-1px);
+}
+
+.pagination button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.pagination span {
+  color: var(--ink);
+  font-weight: 800;
+  font-size: 0.9rem;
 }
 
 .projects-grid {
@@ -1534,7 +1580,7 @@ footer {
   display: flex;
   justify-content: space-between;
   padding: 26px max(24px, calc((100vw - 1440px) / 2));
-  color: var(--cream);
+  color: #fff;
   background: var(--blue-dark);
   font-size: 0.65rem;
   font-weight: 800;
